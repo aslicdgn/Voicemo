@@ -1,13 +1,18 @@
+from pathlib import Path
+
 import whisper
 
+
 class WhisperModel:
-    def __init__(self, model_name="base"):
+    """Wrapper around the OpenAI Whisper speech recognition model."""
+
+    def __init__(self, model_name: str = "base"):
         self.model = whisper.load_model(model_name)
-        
-    def transcribe(self, audio_path):
+
+    def transcribe(self, audio_path: str | Path) -> str:
         result = self.model.transcribe(
-            audio_path,
-            language="tr",
+            str(audio_path),
+            language=None,
         )
-        
-        return result["text"]
+
+        return result["text"].strip()
