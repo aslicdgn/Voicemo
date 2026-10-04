@@ -1,12 +1,8 @@
 """Presentation styling for emotions — the UI's own layer.
 
-The backend tells us *which* emotion was detected (and an emoji); how that
-emotion should *look* on screen is a UI decision, so the accent colour and the
-display word live here rather than in the backend's emotion engine. This keeps
-a clean split: the backend owns detection, the UI owns appearance.
-
-``DisplayResult`` is the small, render-ready object the window actually draws,
-assembled from the backend's result plus this styling.
+The backend says *which* emotion was detected; how it *looks* (emoji, accent
+colour, display word) is a UI decision and lives here, so both the file mode and
+the live mode render emotions the same way from one place.
 """
 
 from __future__ import annotations
@@ -16,38 +12,35 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class EmotionStyle:
-    label: str   # Word shown to the user, e.g. "Happy"
-    color: str   # Accent colour (hex), legible on a light surface
+    label: str
+    emoji: str
+    color: str
 
 
 @dataclass(frozen=True)
 class DisplayResult:
-    """Everything the window needs to render one analysis."""
-
     transcript: str
-    emotion: str        # raw label from the backend, e.g. "happy"
-    confidence: float   # 0.0 – 1.0
-    emoji: str          # taken from the backend result
+    emotion: str
+    confidence: float
+    emoji: str
     color: str
     label: str
-    confident: bool = True   # False when below the backend's confidence threshold
+    confident: bool = True
 
 
-# Colours are picked for contrast on a white card and to stay distinct from one
-# another, so emotion can be read from colour as well as from the word/emoji.
 _STYLES: dict[str, EmotionStyle] = {
-    "angry":     EmotionStyle("Angry",     "#D64545"),
-    "disgusted": EmotionStyle("Disgusted", "#5E8C3E"),
-    "fearful":   EmotionStyle("Fearful",   "#6B5BD2"),
-    "happy":     EmotionStyle("Happy",     "#C98A00"),
-    "neutral":   EmotionStyle("Neutral",   "#6B7280"),
-    "sad":       EmotionStyle("Sad",       "#3B74C4"),
-    "surprised": EmotionStyle("Surprised", "#C14D9E"),
-    "other":     EmotionStyle("Other",     "#6B7280"),
-    "unknown":   EmotionStyle("Unknown",   "#9AA2AE"),
+    "angry":     EmotionStyle("Angry",     "\U0001F620", "#D64545"),
+    "disgusted": EmotionStyle("Disgusted", "\U0001F922", "#5E8C3E"),
+    "fearful":   EmotionStyle("Fearful",   "\U0001F628", "#6B5BD2"),
+    "happy":     EmotionStyle("Happy",     "\U0001F60A", "#C98A00"),
+    "neutral":   EmotionStyle("Neutral",   "\U0001F610", "#6B7280"),
+    "sad":       EmotionStyle("Sad",       "\U0001F622", "#3B74C4"),
+    "surprised": EmotionStyle("Surprised", "\U0001F62E", "#C14D9E"),
+    "other":     EmotionStyle("Other",     "\U0001F914", "#6B7280"),
+    "unknown":   EmotionStyle("Unknown",   "\u2753",     "#9AA2AE"),
 }
 
-_FALLBACK = EmotionStyle("Unknown", "#9AA2AE")
+_FALLBACK = EmotionStyle("Unknown", "\u2753", "#9AA2AE")
 
 
 def style_for(emotion: str) -> EmotionStyle:

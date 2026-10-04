@@ -1,20 +1,22 @@
-"""Reusable widgets that make up the main window's body.
+"""Reusable widgets for the main window's body.
 
-Two panels: the emotion display (the hero — a large emoji, the emotion word and
-a confidence bar, recoloured to the detected emotion) and the transcript panel.
-Both expose small, explicit methods the window calls as analysis progresses, so
-the window never reaches inside them to poke individual labels.
+Three panels: the emotion display (hero), the transcript panel (which can either
+show one result or stream lines in live mode), and the emotion timeline that
+fills up as a live conversation goes on.
 """
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QFrame,
+    QHBoxLayout,
     QLabel,
     QProgressBar,
+    QScrollArea,
     QTextEdit,
     QVBoxLayout,
+    QWidget,
 )
 
 from app.ui.emotion_style import DisplayResult
@@ -32,7 +34,7 @@ class EmotionCard(Card):
     def __init__(self) -> None:
         super().__init__()
 
-        self._emoji = QLabel("\U0001F3A4")  # 🎤
+        self._emoji = QLabel("\U0001F3A4")  # mic
         self._emoji.setObjectName("emotionEmoji")
         self._emoji.setAlignment(Qt.AlignCenter)
 
@@ -75,12 +77,20 @@ class EmotionCard(Card):
         )
 
     def show_waiting(self) -> None:
-        self._emoji.setText("\u23F3")  # ⏳
+        self._emoji.setText("\u23F3")
         self._label.setText("Analyzing")
         self._label.setStyleSheet("")
         self._bar.setStyleSheet("")
-        self._bar.setRange(0, 0)  # indeterminate (busy) animation
+        self._bar.setRange(0, 0)
         self._meta.setText("Running Whisper and emotion2vec")
+
+    def show_listening(self) -> None:
+        self._emoji.setText("\U0001F3A7")  # headphones
+        self._label.setText("Listening")
+        self._label.setStyleSheet("")
+        self._bar.setStyleSheet("")
+        self._bar.setRange(0, 0)
+        self._meta.setText("Waiting for speech")
 
     def reset(self) -> None:
         self._emoji.setText("\U0001F3A4")
@@ -93,7 +103,7 @@ class EmotionCard(Card):
 
 
 class TranscriptPanel(Card):
-    """Shows the recognised speech."""
+    """Shows the recognised speech — one result, or a running stream."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -115,5 +125,82 @@ class TranscriptPanel(Card):
     def set_text(self, text: str) -> None:
         self._text.setPlainText(text or "(No speech detected.)")
 
+    def append_line(self, text: str, prefix: str = "") -> None:
+        text = (text or "").strip()
+        if not text:
+            return
+        self._text.append(f"{prefix}{text}" if prefix else text)
+
     def clear(self) -> None:
         self._text.clear()
+
+
+class TimelinePanel(Card):
+    """A horizontal strip of emotion pills that grows as a conversation goes."""
+
+    _MAX_PILLS = 40
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        heading = QLabel("Emotion timeline")
+        heading.setObjectName("panelHeading")
+
+        self._placeholder = QLabel("Emotions will appear here as people speak.")
+        self._placeholder.setObjectName("emotionMeta")
+
+        self._strip = QWidget()
+        self._row = QHBoxLayout(self._strip)
+        self._row.setContentsMargins(2, 2, 2, 2)
+        self._row.setSpacing(8)
+        self._row.addStretch(1)
+
+        self._scroll = QScrollArea()
+        self._scroll.setObjectName("timeline")
+        self._scroll.setWidgetResizable(True)
+        self._scroll.setFixedHeight(56)
+        self._scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self._scroll.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self._scroll.setWidget(self._strip)
+        self._scroll.hide()
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(20, 14, 20, 16)
+        layout.setSpacing(10)
+        layout.addWidget(heading)
+        layout.addWidget(self._placeholder)
+        layout.addWidget(self._scroll)
+
+        self._pills: list[QLabel] = []
+
+    def add(self, emoji: str, label: str, color: str, time_str: str) -> None:
+        if not self._scroll.isVisible():
+            self._placeholder.hide()
+            self._scroll.show()
+
+        r, g, b = int(color[1:3], 16), int(color[3:5], 16), int(color[5:7], 16)
+        pill = QLabel(f"{emoji}  {time_str}")
+        pill.setToolTip(label)
+        pill.setStyleSheet(
+            f"background: rgba({r},{g},{b},0.12);"
+            f"color: {color}; border: 1px solid rgba({r},{g},{b},0.45);"
+            "border-radius: 12px; padding: 6px 12px; font-weight: 600;"
+        )
+        self._row.insertWidget(self._row.count() - 1, pill)  # before the stretch
+        self._pills.append(pill)
+
+        while len(self._pills) > self._MAX_PILLS:
+            old = self._pills.pop(0)
+            old.setParent(None)
+            old.deleteLater()
+
+        bar = self._scroll.horizontalScrollBar()
+        QTimer.singleShot(0, lambda: bar.setValue(bar.maximum()))
+
+    def clear(self) -> None:
+        for pill in self._pills:
+            pill.setParent(None)
+            pill.deleteLater()
+        self._pills = []
+        self._scroll.hide()
+        self._placeholder.show()

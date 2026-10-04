@@ -54,7 +54,7 @@ class AnalysisWorker(QThread):
             transcript=raw.get("transcription", ""),
             emotion=emotion,
             confidence=confidence,
-            emoji=raw.get("emoji", "\u2753"),
+            emoji=style.emoji,
             color=style.color,
             label=style.label,
             confident=is_confident(confidence),

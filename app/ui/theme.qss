@@ -110,3 +110,43 @@ QScrollBar::handle:vertical {
 QScrollBar::handle:vertical:hover { background: #BFC6CF; }
 QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { height: 0; }
 QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: transparent; }
+
+/* ---- Control bar ---- */
+QFrame#controlBar {
+    background-color: #FFFFFF;
+    border: 1px solid #E3E6EB;
+    border-radius: 14px;
+}
+QFrame#divider { color: #E3E6EB; max-width: 1px; }
+
+QComboBox {
+    background-color: #FFFFFF;
+    border: 1px solid #D7DBE2;
+    border-radius: 9px;
+    padding: 7px 12px;
+    font-size: 13px;
+    min-width: 150px;
+}
+QComboBox:hover { background-color: #F1F3F6; }
+QComboBox::drop-down { border: none; width: 22px; }
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    selection-background-color: #E7F1EF;
+    selection-color: #10322E;
+    outline: none;
+}
+
+/* ---- Timeline ---- */
+QScrollArea#timeline { background: transparent; border: none; }
+QScrollArea#timeline > QWidget > QWidget { background: transparent; }
+QScrollBar:horizontal {
+    background: transparent; height: 8px; margin: 0;
+}
+QScrollBar::handle:horizontal {
+    background: #D3D8DF; border-radius: 4px; min-width: 28px;
+}
+QScrollBar::handle:horizontal:hover { background: #BFC6CF; }
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal { width: 0; }
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal { background: transparent; }
