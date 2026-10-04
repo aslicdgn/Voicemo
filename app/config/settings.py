@@ -11,7 +11,7 @@ EMOTION2VEC_MODEL_PATH = EMOTION2VEC_MODEL_DIR
 
 AUDIO_SAMPLE_RATE = 16000  # Sample rate for audio processing
 AUDIO_CHANNELS = 1  # Number of audio channels (1 for mono, 2 for stereo)
-AUDIO_CHUNK_SECONDS = 5  # Duration of each audio chunk in seconds"
+AUDIO_CHUNK_SECONDS = 5.0  # Duration of each audio chunk in seconds"
 
 EMOTION_CONFIDENCE_THRESHOLD = 0.60  # Confidence threshold for emotion detection
 

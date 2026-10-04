@@ -1,5 +1,4 @@
-from pathlib import Path
-
+import numpy as np
 import whisper
 
 
@@ -9,9 +8,9 @@ class WhisperModel:
     def __init__(self, model_name: str = "base"):
         self.model = whisper.load_model(model_name)
 
-    def transcribe(self, audio_path: str | Path) -> str:
+    def transcribe(self, audio: np.ndarray) -> str:
         result = self.model.transcribe(
-            str(audio_path),
+            audio,
             language=None,
         )
 
