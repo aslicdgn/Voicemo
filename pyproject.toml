@@ -14,6 +14,8 @@ dependencies = [
     "openai-whisper",
     "funasr",
     "modelscope",
+    "sounddevice",
+    "numpy"
 ]
 
 [project.optional-dependencies]
