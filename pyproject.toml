@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Voicemo"
+version = "0.1.0"
+description = "An accessibility-focused desktop application for speech emotion analysis during meetings."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+
+dependencies = [
+    "PySide6>=6.8,<7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0,<9.0",
+    "pytest-qt>=4.4,<5.0",
+]
+
+[project.scripts]
+voicemo = "app.main:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
